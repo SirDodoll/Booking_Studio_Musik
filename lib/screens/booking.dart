@@ -1,4 +1,7 @@
 import 'package:booking_application/providers/theme_providers.dart';
+import 'package:booking_application/root_screens.dart';
+import 'package:booking_application/screens/home.dart';
+import 'package:booking_application/widget/subtitle_text.dart';
 import 'package:booking_application/widget/title.dart';
 import 'package:flutter/material.dart';
 import 'package:booking_application/widget/text_field_widget.dart';
@@ -54,15 +57,19 @@ class _BookingScreenState extends State<BookingScreen> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> RootScreen()),
+                  (route)=> false,
+              );
             },
           ),
-          title: TitlesTextWidget(
-            label: "Booking", color: Colors.white,
+          title: SubtitleTextWidget(
+            label: "Booking", color: Colors.white, fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+
+      child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -86,13 +93,11 @@ class _BookingScreenState extends State<BookingScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        selectedDate ?? "Pilih Tanggal",
-                        style: TextStyle(
+                      SubtitleTextWidget(
+                      label: selectedDate ?? "Pilih Tanggal",
                           color: selectedDate == null
                               ? (isDarkMode ? Colors.white54 : Colors.grey)
                               : (isDarkMode ? Colors.white : Colors.black),
-                        ),
                       ),
                       Icon(Icons.calendar_today, color: isDarkMode ? Colors.white : Colors.black),
                     ],
@@ -105,7 +110,7 @@ class _BookingScreenState extends State<BookingScreen> {
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
                   labelText: "Pilih Waktu",
-                  labelStyle: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                  labelStyle: TextStyle(fontFamily: "Inder", color: isDarkMode ? Colors.white : Colors.black),
                 ),
                 items: times.map((String value) {
                   return DropdownMenuItem<String>(
@@ -117,18 +122,18 @@ class _BookingScreenState extends State<BookingScreen> {
                 dropdownColor: isDarkMode ? Colors.grey[800] : Colors.white,
               ),
               const SizedBox(height: 16),
-              const Text("Perlengkapan Tambahan:"),
+              const SubtitleTextWidget(label: "Perlengkapan Tambahan:"),
               Column(
                 children: equipments.map((String equipment) {
                   return RadioListTile<String>(
-                    title: Text(
-                      equipment,
-                      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                    title: SubtitleTextWidget(
+                     label:  equipment,
+                      color: isDarkMode ? Colors.white : Colors.black,
                     ),
                     value: equipment,
                     groupValue: selectedEquipment,
                     onChanged: (value) => setState(() => selectedEquipment = value),
-                    activeColor: Colors.purple,
+                    activeColor: primaryColor,
                   );
                 }).toList(),
               ),
@@ -160,6 +165,7 @@ class _BookingScreenState extends State<BookingScreen> {
           ),
         ),
       ),
+      ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
@@ -169,13 +175,13 @@ class _BookingScreenState extends State<BookingScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            TitlesTextWidget(label: harga,
+            SubtitleTextWidget(label: harga,
               ),
             SizedBox(
               width: 100,
               child: CustomButton(
                 onPressed: () {},
-                text: "Bayar",
+                text: SubtitleTextWidget(label: "Bayar", color: Colors.white,),
                 backgroundColor: primaryColor ,
                 textColor: Colors.white,
               ),

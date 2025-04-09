@@ -13,7 +13,7 @@ class Styles {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF8742CD),
           primary: const Color(0xFF8742CD),
-          secondary: const Color(0xFF505050),
+          secondary: const Color(0xFFEEDC13),
           error: const Color(0xFFE53935),
           brightness: isDarkTheme ? Brightness.dark : Brightness.light,
         ),

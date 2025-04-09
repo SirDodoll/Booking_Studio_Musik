@@ -34,6 +34,11 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  supabase_flutter: ^2.8.4
+  image_picker: ^1.1.2
+  carousel_slider: ^5.0.0
+  url_launcher: ^6.3.1
+  font_awesome_flutter: ^10.8.0
 
 dev_dependencies:
   flutter_test:
@@ -46,18 +51,22 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
   cupertino_icons: ^1.0.8
-  firebase_core: ^3.12.0
-  firebase_auth: ^5.5.0
-  google_sign_in: ^6.2.2
   url_launcher: ^6.3.1
-  cloud_firestore: ^5.6.5
   provider: ^6.1.2
   shared_preferences: ^2.5.2
   flutter_iconly: ^1.0.2
   shimmer: ^3.0.0
+  card_swiper: ^3.0.1
+  flutter_launcher_icons: ^0.14.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_icons:
+  android: true
+  image_path: "assets/images/iconAPK.png"
+  adaptive_icon_backgroud: "5B28A1"
+  adaptive_icon_foreground: "assets/images/logo.png"
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -83,10 +92,13 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+     - family: Inder
+       fonts:
+         - asset: assets/font/Inder-Regular.ttf
+     - family: Imprint
+       fonts:
+         - asset: assets/font/imprint-mt-shadow.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

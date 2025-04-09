@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
   final VoidCallback onPressed;
-  final String text;
+  final Widget text;
   final Color backgroundColor;
   final Color textColor;
   final bool isOutlined;
@@ -36,7 +36,7 @@ class CustomButton extends StatelessWidget {
         ),
         child: isLoading
             ? const CircularProgressIndicator(color: Colors.red)
-            : Text(text, style: TextStyle(color: backgroundColor, fontSize: 16)),
+            : text,
       )
           : ElevatedButton(
         onPressed: isLoading ? null : onPressed,
@@ -48,7 +48,7 @@ class CustomButton extends StatelessWidget {
         ),
         child: isLoading
             ? const CircularProgressIndicator(color: Colors.white)
-            : Text(text, style: TextStyle(color: textColor, fontSize: 16)),
+            : text,
       ),
     );
   }

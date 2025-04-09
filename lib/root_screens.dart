@@ -5,8 +5,7 @@ import 'package:booking_application/screens/profile.dart';
 import 'package:booking_application/screens/riwayat.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter/material.dart';
-
-
+import 'package:booking_application/theme/theme_data.dart';
 
 class RootScreen extends StatefulWidget {
   const RootScreen({super.key});
@@ -19,9 +18,9 @@ class _RootScreenState extends State<RootScreen> {
   late PageController controller;
   int currentScreen = 0;
 
+
   List<Widget> screens = [
-    HomeScreens(),
-    ChatScreen(),
+    HomeScreen(),
     BookingScreen(),
     RiwayatScreen(),
     ProfileScreen(),
@@ -35,13 +34,25 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: PageView(
         controller: controller,
         physics: const NeverScrollableScrollPhysics(),
         children: screens,
       ),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+       navigationBarTheme:  NavigationBarThemeData(
+        labelTextStyle: MaterialStateProperty.all(
+          const TextStyle(
+            fontFamily: 'Inder',
+            fontSize: 12,
+          ),
+        ),
+      ),
+        ),
+      child: NavigationBar(
         selectedIndex: currentScreen,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         height: kBottomNavigationBarHeight,
@@ -52,17 +63,17 @@ class _RootScreenState extends State<RootScreen> {
             currentScreen = value;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
             selectedIcon: Icon(IconlyBold.home),
             icon: Icon(IconlyLight.home),
             label: "home",
           ),
-          NavigationDestination(
-            selectedIcon: Icon(IconlyBold.chat),
-            icon: Icon(IconlyLight.chat),
-            label: "chat",
-          ),
+          // NavigationDestination(
+          //   selectedIcon: Icon(IconlyBold.chat),
+          //   icon: Icon(IconlyLight.chat),
+          //   label: "chat",
+          // ),
           NavigationDestination(
             selectedIcon: Icon(IconlyBold.calendar),
             icon: Icon(IconlyLight.calendar),
@@ -80,6 +91,7 @@ class _RootScreenState extends State<RootScreen> {
           ),
         ],
       ),
+      )
     );
   }
 }

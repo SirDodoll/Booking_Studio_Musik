@@ -32,11 +32,11 @@ class TextFieldWidget extends StatelessWidget {
       keyboardType: keyboardType,
       obscureText: obscureText,
       readOnly: readOnly,
-      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black, fontFamily: 'Inder',),
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: isDarkMode ? Colors.white : Colors.black),
         hintText: hintText,
-        hintStyle: TextStyle(color: isDarkMode ? Colors.white54 : Colors.grey),
+        hintStyle: TextStyle(color: isDarkMode ? Colors.white54 : Colors.grey, fontFamily: 'Inder',),
         filled: true,
         fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
         enabledBorder: OutlineInputBorder(
