@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 class MusicInstruments extends StatelessWidget {
   final List<Map<String, String>> instruments = [
-    {"name": "Bass", "image": "assets/images/guitar.jpeg"},
+    {"name": "Guitar", "image": "assets/images/guitar.jpeg"},
     {"name": "Drum", "image": "assets/images/drum.jpeg"},
-    {"name": "Guitar", "image": "assets/images/bass.jpeg"},
+    {"name": "Bass", "image": "assets/images/bass.jpeg"},
     {"name": "Keyboard", "image": "assets/images/keyboard.jpeg"},
   ];
 

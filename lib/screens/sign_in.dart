@@ -37,9 +37,10 @@ class _SignInScreenState extends State<SignInScreen> {
 
       if (response.user != null) {
         if (mounted) {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => const RootScreen()),
+            MaterialPageRoute(builder: (context) => RootScreen()),
+              (route) => false,
           );
         }
       } else {

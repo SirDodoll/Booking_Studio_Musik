@@ -51,12 +51,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       final File file = File(image.path);
       final String userId = supabase.auth.currentUser!.id;
-      final String filePath = 'avatars/$userId.jpg';
+      final String filePath = 'images/$userId.jpg';
 
-      await supabase.storage.from('avatars').upload(filePath, file,
+      await supabase.storage.from('images').upload(filePath, file,
           fileOptions: const FileOptions(upsert: true));
 
-      final String publicUrl = supabase.storage.from('avatars').getPublicUrl(filePath);
+      final String publicUrl = supabase.storage.from('images').getPublicUrl(filePath);
 
       await supabase.from('users').update({'foto': publicUrl}).eq('id', userId);
 

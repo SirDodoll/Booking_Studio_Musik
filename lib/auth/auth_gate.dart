@@ -1,3 +1,4 @@
+import 'package:booking_application/root_screens.dart';
 import 'package:booking_application/screens/home.dart';
 import 'package:booking_application/screens/sign_in.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +21,8 @@ class AuthGate extends StatelessWidget {
             );
           }
           final session = snapshot.hasData ? snapshot.data!.session : null;
-
           if (session!=null){
-            return HomeScreen();
+            return RootScreen();
           }else{
             return SignInScreen();
           }

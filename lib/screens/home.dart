@@ -15,6 +15,7 @@ import 'package:booking_application/providers/app_constans.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:booking_application/auth/settings_services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,30 +25,73 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TimeOfDay openTime = const TimeOfDay(hour: 9, minute: 0);
-  final TimeOfDay closeTime = const TimeOfDay(hour: 22, minute: 0);
+
+  String? urlLokasi;
+  String? urlIg;
+  TimeOfDay? jamBuka;
+  TimeOfDay? jamTutup;
   bool isStudioOpen() {
     final now = TimeOfDay.now();
-    return now.hour >= openTime.hour && now.hour < closeTime.hour;
+    if (jamBuka == null || jamTutup == null) return false;
+    return now.hour >= jamBuka!.hour && now.hour < jamTutup!.hour;
   }
 
-  Future<void> launchMapsUrl() async {
-    const mapsUrl = 'https://maps.app.goo.gl/d4uX1DVWLUAxZ4m77';
-    final uri = Uri.parse(mapsUrl);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      throw 'Tidak bisa membuka $mapsUrl';
+  @override
+  void initState(){
+    super.initState();
+    loadSettings();
+  }
+
+  Future<void> loadSettings() async {
+    final ig = await getSettingsValue('instagram');
+    final lokasi = await getSettingsValue('lokasi');
+    final buka = await getJam("buka");
+    final tutup = await getJam("tutup");
+
+      setState(() {
+        urlIg = ig;
+        urlLokasi = lokasi;
+        jamBuka = buka;
+        jamTutup = tutup;
+      });
+    }
+
+  Future<TimeOfDay?> getJam(String name) async {
+    final value = await getSettingsValue(name);
+    if (value == null) return null;
+
+    final parts = value.split(':');
+    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+  }
+
+  Future<void> launchLokasi() async {
+    final lokasiUrl = await getSettingsValue('lokasi');
+
+    if (lokasiUrl == null) {
+      throw Exception("Lokasi tidak ditemukan");
+    }
+
+    final Uri url = Uri.parse(lokasiUrl);
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception("Gagal Membuka lokasi");
     }
   }
 
-  Future<void> launchInstagram() async{
-    final Uri url= Uri.parse("https://www.instagram.com/rz.kiw");
+  Future<void> launchInstagram() async {
+    final igUrl = await getSettingsValue('instagram');
 
-    if(!await launchUrl(url, mode: LaunchMode.externalApplication)){
+    if (igUrl == null) {
+      throw Exception("Instagram tidak ditemukan");
+    }
+
+    final Uri url = Uri.parse(igUrl);
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception("Gagal Membuka Instagram");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.only(right: 14.0),
               child: GestureDetector(
                 onTap: () {
-                 launchMapsUrl();
+                 launchLokasi();
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -113,9 +157,9 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               SizedBox(height: 7),
               JamOperasionalWidget(
-                openTime: openTime,
-                closeTime: closeTime,
-                isOpen: isOpen,
+                buka: jamBuka ?? TimeOfDay(hour: 0, minute: 0),
+                tutup: jamTutup ?? TimeOfDay(hour: 0, minute: 0),
+                isOpen: isStudioOpen(),
               ),
               SizedBox(height: 7),
               // Swiper Card
@@ -135,9 +179,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             );
                           }else if( index == 1){
-                            const mapsUrl = 'https://maps.app.goo.gl/d4uX1DVWLUAxZ4m77';
-                            final uri = Uri.parse(mapsUrl);
-                            launchUrl(uri, mode: LaunchMode.externalApplication);
+                            if (urlLokasi != null){
+                              final uri = Uri.parse(urlLokasi!);
+                              launchUrl(uri, mode: LaunchMode.externalApplication);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Lokasi belum tersedia')),
+                              );
+                            }
                           }
                         },
                         child: Image.asset(
@@ -210,13 +259,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   {
                     'imageUrl': 'assets/images/profile.jpeg',
                     'name': 'nama',
-                    'date': '07-03-2025',
                     'time': '09:00 - 12:00',
                   },
                   {
                     'imageUrl': 'assets/images/profile.jpeg',
                     'name': 'Orang',
-                    'date': '07-03-2025',
                     'time': '13:00 - 15:00',
                   },
                 ],

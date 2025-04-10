@@ -2,14 +2,14 @@ import 'package:booking_application/widget/subtitle_text.dart';
 import 'package:flutter/material.dart';
 
 class JamOperasionalWidget extends StatelessWidget {
-  final TimeOfDay openTime;
-  final TimeOfDay closeTime;
+  final TimeOfDay buka;
+  final TimeOfDay tutup;
   final bool isOpen;
 
   const JamOperasionalWidget({
     super.key,
-    required this.openTime,
-    required this.closeTime,
+    required this.buka,
+    required this.tutup,
     required this.isOpen,
   });
 
@@ -47,7 +47,7 @@ class JamOperasionalWidget extends StatelessWidget {
                         color: Colors.black87,
                       ),
                     SubtitleTextWidget(label:
-                      "${openTime.format(context)} - ${closeTime.format(context)}",
+                      "${buka.format(context)} - ${tutup.format(context)}",
                       fontSize: 15,
                       color: Colors.black54,
                     ),

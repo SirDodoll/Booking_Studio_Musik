@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
           final session = Supabase.instance.client.auth.currentSession;
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            title: 'ID MUSIC',
+            title: 'ID MUSIC   ',
             theme: Styles.themeData(
                 isDarkTheme: themeProviders.getIsDarkTheme,
                 context: context

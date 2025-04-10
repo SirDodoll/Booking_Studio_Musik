@@ -28,7 +28,6 @@ class InfoJadwalWidget extends StatelessWidget {
               return JadwalCard(
                 imageUrl: booking['imageUrl']!,
                 name: booking['name']!,
-                date: booking['date']!,
                 time: booking['time']!,
               );
             },
@@ -42,14 +41,12 @@ class InfoJadwalWidget extends StatelessWidget {
 class JadwalCard extends StatelessWidget {
   final String imageUrl;
   final String name;
-  final String date;
   final String time;
 
   const JadwalCard({
     super.key,
     required this.imageUrl,
     required this.name,
-    required this.date,
     required this.time,
   });
 
@@ -86,9 +83,7 @@ class JadwalCard extends StatelessWidget {
                       const SizedBox(height: 5),
                       Row(
                         children: [
-                          SubtitleTextWidget(label: date, fontSize: 12
-                          ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 1),
                           SubtitleTextWidget(label: time, fontSize: 12
                           ),
                         ],
