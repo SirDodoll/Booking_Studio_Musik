@@ -3,19 +3,18 @@ import 'package:booking_application/screens/chat.dart';
 import 'package:booking_application/screens/faq.dart';
 import 'package:booking_application/widget/appbarName_widget.dart';
 import 'package:booking_application/widget/subtitle_text.dart';
-import 'package:booking_application/widget/title.dart';
 import 'package:flutter/material.dart';
 import 'package:booking_application/widget/alatMusic_widget.dart' show MusicInstruments;
 import 'package:booking_application/widget/infoJadwal.dart';
 import 'package:booking_application/widget/jam_oprasional.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:booking_application/widget/IconButton.dart';
-import 'package:booking_application/screens/chat.dart';
 import 'package:booking_application/providers/app_constans.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:booking_application/auth/settings_services.dart';
+import 'package:booking_application/widget/responsive.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,11 +42,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> loadSettings() async {
-    final ig = await getSettingsValue('instagram');
-    final lokasi = await getSettingsValue('lokasi');
-    final buka = await getJam("buka");
-    final tutup = await getJam("tutup");
+    final ig = await getSettingValue('instagram');
+    final lokasi = await getSettingValue('lokasi');
+    final buka = await getJam("jamBuka");
+    final tutup = await getJam("jamTutup");
 
+    if (!mounted) return;
       setState(() {
         urlIg = ig;
         urlLokasi = lokasi;
@@ -56,8 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-  Future<TimeOfDay?> getJam(String name) async {
-    final value = await getSettingsValue(name);
+  Future<TimeOfDay?> getJam(String key) async {
+    final value = await getSettingValue(key);
     if (value == null) return null;
 
     final parts = value.split(':');
@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> launchLokasi() async {
-    final lokasiUrl = await getSettingsValue('lokasi');
+    final lokasiUrl = await getSettingValue('lokasi');
 
     if (lokasiUrl == null) {
       throw Exception("Lokasi tidak ditemukan");
@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> launchInstagram() async {
-    final igUrl = await getSettingsValue('instagram');
+    final igUrl = await getSettingValue('instagram');
 
     if (igUrl == null) {
       throw Exception("Instagram tidak ditemukan");
@@ -99,10 +99,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final primaryColor = theme.colorScheme.primary;
     final secondaryColor = theme.colorScheme.secondary;
     final isOpen = isStudioOpen();
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
+        preferredSize: Size.fromHeight(getResponsiveSize(context, 0.19)),
         child: AppBar(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
@@ -110,34 +111,38 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Image.asset(
                 'assets/images/logo2.png',
-                height: 27,
+                height: getResponsiveSize(context, 0.10),
+                width: getResponsiveSize(context, 0.09),
               ),
-              const SizedBox(width: 10,),
-              const AppbarnameWidget(),
+              SizedBox(width: getResponsiveSize(context, 0.03),),
+              AppbarnameWidget(),
             ],
           ),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 14.0),
+              padding: EdgeInsets.only(right: getResponsiveSize(context, 0.04)),
               child: GestureDetector(
                 onTap: () {
                  launchLokasi();
                 },
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: getResponsiveSize(context, 0.040),
+                      vertical: getResponsiveSize(context, 0.017)
+                  ),
                   decoration: BoxDecoration(
                     color: secondaryColor.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(getResponsiveSize(context, 0.05)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.location_on, color: Colors.white, size: 20),
-                      SizedBox(width: 5),
+                      Icon(Icons.location_on, color: Colors.white, size: getResponsiveSize(context, 0.068)),
+                      SizedBox(width: getResponsiveSize(context, 0.011)),
                       SubtitleTextWidget(
                         label: "Lokasi",
                         color: Colors.white,
-                        fontSize: 15,
+                        fontSize: getResponsiveFontSize(context, 0.047),
                         fontWeight: FontWeight.bold,
                       ),
                     ],
@@ -163,49 +168,53 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 7),
               // Swiper Card
-              SizedBox(
-                height: 210,
-                width: 350,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(7),
-                  child: Swiper(
-                    autoplay: true,
-                    itemBuilder: (BuildContext context, int index) {
-                      return GestureDetector(
-                        onTap: () {
-                          if (index == 0){
-                            Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context) => BookingScreen(),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return SizedBox(
+                    width: getResponsiveSize(context, 0.96),
+                    height: getResponsiveSize(context, 0.61),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(7),
+                      child: Swiper(
+                        autoplay: true,
+                        itemBuilder: (BuildContext context, int index) {
+                          return GestureDetector(
+                            onTap: () {
+                              if (index == 0) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => BookingScreen()),
+                                );
+                              } else if (index == 1) {
+                                if (urlLokasi != null) {
+                                  final uri = Uri.parse(urlLokasi!);
+                                  launchUrl(uri, mode: LaunchMode.externalApplication);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Lokasi belum tersedia')),
+                                  );
+                                }
+                              }
+                            },
+                            child: Image.asset(
+                              AppConstants.bannersImages[index],
+                              fit: BoxFit.fill,
                             ),
-                            );
-                          }else if( index == 1){
-                            if (urlLokasi != null){
-                              final uri = Uri.parse(urlLokasi!);
-                              launchUrl(uri, mode: LaunchMode.externalApplication);
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Lokasi belum tersedia')),
-                              );
-                            }
-                          }
+                          );
                         },
-                        child: Image.asset(
-                        AppConstants.bannersImages[index],
-                        fit: BoxFit.fill,
-                      ),
-                      );
-                    },
-                    itemCount: AppConstants.bannersImages.length,
-                    pagination: SwiperPagination(
-                      // alignment: Alignment.center,
-                      builder: DotSwiperPaginationBuilder(
-                          activeColor: secondaryColor,
-                          color: Colors.white
+                        itemCount: AppConstants.bannersImages.length,
+                        pagination: SwiperPagination(
+                          builder: DotSwiperPaginationBuilder(
+                            activeColor: secondaryColor,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
+
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(

@@ -1,16 +1,10 @@
 import 'dart:io';
 import 'package:booking_application/screens/sign_in.dart';
 import 'package:booking_application/widget/subtitle_text.dart';
-import 'package:booking_application/widget/title.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:booking_application/providers/theme_providers.dart';
-import 'package:booking_application/widget/text_field_widget.dart';
-import 'package:booking_application/widget/button_widget.dart';
 import 'package:booking_application/auth/auth_services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:booking_application/theme/theme_data.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,12 +14,74 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  File? _imageFile;
+  String? _uploadedImageUrl;
+  bool isPicking = false;
+
+  Future pickImage() async {
+    if (isPicking) return;
+    isPicking = true;
+
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+      if (!mounted) return;
+
+      if (image != null) {
+        setState(() {
+          _imageFile = File(image.path);
+          _uploadedImageUrl = null;
+        });
+      }
+    } catch (e) {
+      print('Image picking error: $e');
+    } finally {
+      isPicking = false;
+    }
+  }
+
+
+  // Upload Image
+  Future uploadImage() async {
+    if (_imageFile == null) return;
+
+    final fileName = DateTime.now().microsecondsSinceEpoch.toString();
+    final path = 'upload/$fileName.jpg';
+
+    try {
+      await Supabase.instance.client.storage
+          .from('images')
+          .upload(path, _imageFile!, fileOptions: const FileOptions(cacheControl: '3600', upsert: false));
+
+      final urlResponse = Supabase.instance.client.storage
+          .from('images')
+          .getPublicUrl(path);
+
+      setState(() {
+        _uploadedImageUrl = urlResponse;
+      });
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Upload Success")),
+        );
+      }
+    } catch (e) {
+      print("Upload error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Upload Gagal")),
+      );
+    }
+  }
+
+
+
   final authService = AuthService();
   final SupabaseClient supabase = Supabase.instance.client;
   String? _email;
   String? _name;
   String? _telepon;
-  String? _profileImageUrl;
 
   @override
   void initState() {
@@ -39,40 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _email = userData?['email'] ?? "Tidak ada email";
       _name = userData?['name'] ?? "Pengguna";
       _telepon = userData?['telepon'] ?? "tidak ada telepon";
-      _profileImageUrl = userData?['foto'];
     });
-  }
-  Future<void> _uploadProfilePicture() async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-      if (image == null) return;
-
-      final File file = File(image.path);
-      final String userId = supabase.auth.currentUser!.id;
-      final String filePath = 'images/$userId.jpg';
-
-      await supabase.storage.from('images').upload(filePath, file,
-          fileOptions: const FileOptions(upsert: true));
-
-      final String publicUrl = supabase.storage.from('images').getPublicUrl(filePath);
-
-      await supabase.from('users').update({'foto': publicUrl}).eq('id', userId);
-
-      setState(() {
-        _profileImageUrl = publicUrl;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Foto profil berhasil diperbarui!')),
-      );
-    } catch (e) {
-      print('Gagal mengunggah foto: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengunggah foto')),
-      );
-    }
   }
 
   void logout() async {
@@ -111,8 +134,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    bool isDarkMode = themeProvider.getIsDarkTheme;
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
     return Scaffold(
@@ -134,10 +155,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       CircleAvatar(
                         radius: 70,
-                        backgroundImage: _profileImageUrl != null
-                            ? NetworkImage(_profileImageUrl!)
-                            : const AssetImage("assets/images/profile.jpeg") as ImageProvider,
+                        backgroundImage: _uploadedImageUrl != null
+                            ? NetworkImage(_uploadedImageUrl!)
+                            : _imageFile != null
+                          ? FileImage(_imageFile!) as ImageProvider
+                            : null,
+                        child: _uploadedImageUrl == null && _imageFile == null
+                        ? const Icon(Icons.person, size: 50)
+                        :null,
                       ),
+
                       Container(
                         decoration: BoxDecoration(
                           color: primaryColor.withOpacity(0.6),
@@ -145,64 +172,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                      child:  IconButton(
                         icon: Icon(Icons.camera_alt, color: Colors.black),
-                        onPressed: _uploadProfilePicture,
+                        onPressed: pickImage,
                       ),
                       )
                     ],
                   ),
+
+                  const SizedBox(height: 16),
+                  if (_imageFile != null)
+                    ElevatedButton.icon(
+                      onPressed: uploadImage,
+                      icon: const Icon(Icons.upload),
+                      label: const SubtitleTextWidget(label: "save"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                   const SizedBox(height: 10),
                   SubtitleTextWidget(fontWeight: FontWeight.bold, label: _name ?? "Loading..."),
                   const SizedBox(height: 5),
                   SubtitleTextWidget(fontWeight: FontWeight.bold, label: _email ?? "Loading..."),
                   const SizedBox(height: 50),
-                  TextFieldWidget(
-                    icon: Icons.person,
-                    hintText: "Nama",
+                  TextField(
                     controller: TextEditingController(text: _name ?? ""),
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.person),
+                      border: OutlineInputBorder(),
+                    ),
                     readOnly: true,
                   ),
                   const SizedBox(height: 30),
-                  TextFieldWidget(
-                    icon: Icons.email,
-                    hintText: "Email",
+                  TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.email),
+                      border: OutlineInputBorder(),
+                    ),
                     controller: TextEditingController(text: _email ?? ""),
                     readOnly: true,
                   ),
                   SizedBox(height: 30),
-                  TextFieldWidget(
-                    icon: Icons.email,
-                    hintText: "No Telepon",
+                  TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.phone),
+                      border: OutlineInputBorder(),
+                    ),
                     controller: TextEditingController(text: _telepon ?? ""),
                     readOnly: true,
                   ),
-                  SizedBox(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-
-                  const Text(
-                    "Dark Mode",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "Inder"),
-                  ),
-                  Switch(
-                    value: isDarkMode,
-                    onChanged: (value) {
-                      themeProvider.setDarkTheme(themeValue: value);
-                    },
-                  ),
-                    ],
-                  ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: CustomButton(
-                          onPressed: logout,
-                          text: SubtitleTextWidget(label: "Log Out", color: Colors.white,),
-                          backgroundColor: Colors.red,
-                          textColor: Colors.white,
-                          isOutlined: false,
-                        ),
+                      const SizedBox(height: 40),
+                  ElevatedButton(
+                    onPressed: logout,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.red,
+                      minimumSize: Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                    ),
+                    child: SubtitleTextWidget(
+                      label: "Log Out",
+                      color: Colors.white),
+                  ),
+
                 ],
               ),
             ),

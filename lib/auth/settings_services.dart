@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 
   final supabase = Supabase.instance.client;
 
-Future<String?> getSettingsValue(String name) async {
+Future<dynamic> getSettingValue(String key) async {
   final response = await supabase
       .from('settings')
-      .select('value')
-      .eq('name', name)
+      .select()
       .maybeSingle();
 
-  return response?['value'];
+  return response?[key];
 }
+

@@ -1,6 +1,7 @@
 import 'package:booking_application/widget/subtitle_text.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:booking_application/widget/responsive.dart';
 
 class IconbuttonWidget extends StatelessWidget {
   const IconbuttonWidget({super.key, required this.icon, required this.label, required this.color, required this.onPressed});
@@ -16,12 +17,17 @@ class IconbuttonWidget extends StatelessWidget {
       child: Column(
         children: [
           CircleAvatar(
-        radius: 22,
+        radius: getResponsiveSize(context, 0.058),
         backgroundColor: color,
-        child: Icon(icon, color: Colors.white, size: 23,),
+        child: Icon(icon, color: Colors.white, size: getResponsiveSize(context, 0.072),),
           ),
-          const SizedBox(height: 6,),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, fontFamily: 'Inder')),
+          SizedBox(height: 6,),
+          SubtitleTextWidget(
+            label: label,
+            fontSize: getResponsiveFontSize(context, 0.040),
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Inder',
+          ),
         ],
       ),
 

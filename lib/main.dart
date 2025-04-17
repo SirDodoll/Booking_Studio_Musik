@@ -4,8 +4,6 @@ import 'package:booking_application/screens/sign_up.dart';
 import 'package:flutter/material.dart';
 import 'package:booking_application/theme/theme_data.dart';
 import 'package:booking_application/root_screens.dart';
-import 'package:booking_application/providers/theme_providers.dart';
-import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
@@ -22,24 +20,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
-      ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProviders, child) {
-          final session = Supabase.instance.client.auth.currentSession;
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'ID MUSIC   ',
-            theme: Styles.themeData(
-                isDarkTheme: themeProviders.getIsDarkTheme,
-                context: context
-            ),
-            home: session != null ? RootScreen() : SignInScreen(),
-          );
-        },
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'ID MUSIC',
+      theme: Styles.themeData(context),
+      home: RootScreen(),
     );
   }
 }

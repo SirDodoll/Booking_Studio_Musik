@@ -1,3 +1,4 @@
+import 'package:booking_application/widget/responsive.dart';
 import 'package:booking_application/widget/subtitle_text.dart';
 import 'package:flutter/material.dart';
 
@@ -16,9 +17,13 @@ class JamOperasionalWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+      padding: EdgeInsets.symmetric(vertical: getResponsiveSize(context, 0.030),
+          horizontal: getResponsiveSize(context, 0.034)
+      ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(vertical: getResponsiveSize(context, 0.030),
+            horizontal: getResponsiveSize(context, 0.034)
+        ),
         decoration: BoxDecoration(
           color: Colors.grey[200],
           borderRadius: BorderRadius.circular(12),
@@ -35,20 +40,20 @@ class JamOperasionalWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.access_time, color: Colors.black54, size: 24),
-                const SizedBox(width: 8),
+                Icon(Icons.access_time, color: Colors.black54, size: getResponsiveSize(context, 0.080)),
+                SizedBox(width: getResponsiveSize(context, 0.020)),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SubtitleTextWidget(
                       label: "Jam Operasional",
-                        fontSize: 16,
+                        fontSize: getResponsiveFontSize(context, 0.050),
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
                     SubtitleTextWidget(label:
                       "${buka.format(context)} - ${tutup.format(context)}",
-                      fontSize: 15,
+                      fontSize: getResponsiveFontSize(context, 0.045),
                       color: Colors.black54,
                     ),
                   ],
@@ -56,7 +61,10 @@ class JamOperasionalWidget extends StatelessWidget {
               ],
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                  horizontal: getResponsiveSize(context, 0.022),
+                  vertical: getResponsiveSize(context, 0.020)
+              ),
               decoration: BoxDecoration(
                 color: isOpen ? Colors.green : Colors.red,
                 borderRadius: BorderRadius.circular(8),
@@ -68,10 +76,10 @@ class JamOperasionalWidget extends StatelessWidget {
                     color: Colors.white,
                     size: 16,
                   ),
-                  SizedBox(width: 5),
+                  SizedBox(width: getResponsiveSize(context, 0.015)),
                   SubtitleTextWidget(
                    label:  isOpen ? "Buka" : "Tutup",
-                    color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15,
+                    color: Colors.white, fontWeight: FontWeight.bold, fontSize: getResponsiveFontSize(context, 0.045),
                   ),
                 ],
               ),

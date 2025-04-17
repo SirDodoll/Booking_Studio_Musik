@@ -1,3 +1,4 @@
+import 'package:booking_application/widget/responsive.dart';
 import 'package:booking_application/widget/subtitle_text.dart';
 import 'package:flutter/material.dart';
 
@@ -53,24 +54,24 @@ class JadwalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: getResponsiveSize(context, 0.017)),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 4,
         child: SizedBox(
-          width: 270,
+          width: getResponsiveSize(context, 0.74),
           child: Row(
             children: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(getResponsiveSize(context, 0.020)),
                 child: CircleAvatar(
-                  radius: 30,
+                  radius: getResponsiveSize(context, 0.090),
                   backgroundImage: AssetImage(imageUrl),
                 ),
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(getResponsiveSize(context, 0.055)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -78,12 +79,12 @@ class JadwalCard extends StatelessWidget {
                       SubtitleTextWidget(
                         label: name,
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: getResponsiveSize(context, 0.047),
                       ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: getResponsiveSize(context, 0.016)),
                       Row(
                         children: [
-                          const SizedBox(width: 1),
+                          SizedBox(width: getResponsiveSize(context, 0.015)),
                           SubtitleTextWidget(label: time, fontSize: 12
                           ),
                         ],

@@ -3,6 +3,7 @@ import 'package:booking_application/screens/chat.dart';
 import 'package:booking_application/screens/home.dart';
 import 'package:booking_application/screens/profile.dart';
 import 'package:booking_application/screens/riwayat.dart';
+import 'package:booking_application/widget/responsive.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter/material.dart';
 import 'package:booking_application/theme/theme_data.dart';
@@ -45,9 +46,9 @@ class _RootScreenState extends State<RootScreen> {
         data: Theme.of(context).copyWith(
        navigationBarTheme:  NavigationBarThemeData(
         labelTextStyle: MaterialStateProperty.all(
-          const TextStyle(
+           TextStyle(
             fontFamily: 'Inder',
-            fontSize: 12,
+            fontSize: getResponsiveSize(context, 0.035),
           ),
         ),
       ),
@@ -66,7 +67,7 @@ class _RootScreenState extends State<RootScreen> {
         destinations: [
           NavigationDestination(
             selectedIcon: Icon(IconlyBold.home),
-            icon: Icon(IconlyLight.home),
+            icon: Icon(IconlyLight.home,),
             label: "home",
           ),
           // NavigationDestination(

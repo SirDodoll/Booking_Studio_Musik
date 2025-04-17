@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:booking_application/root_screens.dart';
 
 class AuthService {
   final supabase = Supabase.instance.client;
@@ -58,18 +61,6 @@ class AuthService {
       await supabase.auth.signOut();
     } catch (e) {
       throw Exception("Error saat logout: $e");
-    }
-  }
-
-  // Sign in with Google
-  Future<void> signInWithGoogle() async {
-    try {
-      await supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: 'io.supabase.flutter://login-callback/',
-      );
-    } catch (e) {
-      throw Exception("Login Google gagal: $e");
     }
   }
 

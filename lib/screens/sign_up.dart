@@ -1,9 +1,13 @@
+import 'package:booking_application/auth/settings_services.dart';
+import 'package:booking_application/root_screens.dart';
 import 'package:booking_application/screens/sign_in.dart';
 import 'package:booking_application/widget/subtitle_text.dart';
 import 'package:flutter/material.dart';
 import 'package:booking_application/auth/auth_services.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -25,6 +29,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool hidePassword = true;
   bool hideConfirm = true;
+
+  // Sign in Google
+  void initState() {
+    _setupAuthListener();
+    super.initState();
+  }
+  void _setupAuthListener() {
+    supabase.auth.onAuthStateChange.listen((data) {
+      final event = data.event;
+      if (event == AuthChangeEvent.signedIn) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const RootScreen(),
+          ),
+        );
+      }
+    });
+  }
+  Future<AuthResponse> _googleSignIn() async {
+    /// TODO: update the Web client ID with your own.
+    ///
+    /// Web Client ID that you registered with Google Cloud.
+    const webClientId = '1093587091479-0jkhdhm4pthpfeagi4qddnoskv6hssd1.apps.googleusercontent.com';
+
+    /// TODO: update the iOS client ID with your own.
+    ///
+    /// iOS Client ID that you registered with Google Cloud.
+    const iosClientId = 'my-ios.apps.googleusercontent.com';
+
+    // Google sign in on Android will work without providing the Android
+    // Client ID registered on Google Cloud.
+
+    final GoogleSignIn googleSignIn = GoogleSignIn(
+      // clientId: iosClientId,
+      serverClientId: webClientId,
+    );
+    final googleUser = await googleSignIn.signIn();
+    final googleAuth = await googleUser!.authentication;
+    final accessToken = googleAuth.accessToken;
+    final idToken = googleAuth.idToken;
+
+    if (accessToken == null) {
+      throw 'No Access Token found.';
+    }
+    if (idToken == null) {
+      throw 'No ID Token found.';
+    }
+
+    return supabase.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+      accessToken: accessToken,
+    );
+  }
 
   void SignUp() async {
     final name = _nameController.text.trim();
@@ -49,6 +107,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     }
   }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -193,16 +253,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: () async {
-                                try {
-                                  await authService.signInWithGoogle();
-                                } catch (e) {
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(content: Text("Google Login Error: $e")));
-                                  }
-                                }
-                              },
+                              onPressed: _googleSignIn,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
