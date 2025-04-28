@@ -1,9 +1,9 @@
 import 'package:booking_application/root_screens.dart';
-import 'package:booking_application/screens/home.dart';
 import 'package:booking_application/screens/sign_up.dart';
 import 'package:flutter/material.dart';
 import 'package:booking_application/auth/auth_services.dart';
 import 'package:booking_application/widget/subtitle_text.dart';
+import 'package:booking_application/widget/responsive.dart'; // <- Tambahkan ini
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -24,8 +24,7 @@ class _SignInScreenState extends State<SignInScreen> {
   bool loading = false;
 
   void login() async {
-    if (!_formKey.currentState!.validate())
-      return;
+    if (!_formKey.currentState!.validate()) return;
 
     final email = _emailController.text;
     final password = _passwordController.text;
@@ -40,7 +39,7 @@ class _SignInScreenState extends State<SignInScreen> {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => RootScreen()),
-              (route) => false,
+                (route) => false,
           );
         }
       } else {
@@ -60,164 +59,168 @@ class _SignInScreenState extends State<SignInScreen> {
     setState(() => loading = false);
   }
 
-
-  void signIn() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => loading = true);
-    setState(() => loading = false);
-  }
-
-  void signUpWithGoogle() async {
-    setState(() => loading = true);
-    setState(() => loading = false);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SingleChildScrollView(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  Container(
-                    height: 210,
-                    color: const Color(0xFF6539A2),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      "Welcome",
-                      style: TextStyle(
-                        fontSize: 52,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'imprint',
-                      ),
-                    ),
-                  ),
-                  Container(
-                    color: const Color(0xFF6539A2),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      margin: const EdgeInsets.only(top: 40),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 20),
-                          const Text(
-                            "Masuk Sekarang",
-                            style: TextStyle(
-                              fontSize: 25,
-                              fontFamily: 'Inder',
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          TextField(
-                            controller: _emailController,
-                            decoration: const InputDecoration(
-                              label: SubtitleTextWidget(label: "Email"),
-                              prefixIcon: Icon(Icons.email),
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          TextField(
-                            controller: _passwordController,
-                            obscureText: hidePassword,
-                            focusNode: _focusNode,
-                            decoration: InputDecoration(
-                              label: SubtitleTextWidget(label: "Password"),
-                              border: const OutlineInputBorder(),
-                              prefixIcon: const Icon(Icons.lock),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                    hidePassword ? Icons.visibility : Icons.visibility_off),
-                                onPressed: () {
-                                  setState(() {
-                                    hidePassword = !hidePassword;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 30),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6539A2),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              onPressed: login,
-                              child: const SubtitleTextWidget(label: "Masuk",
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                ),
-                              ),
-                            ),
-                          const SizedBox(height: 30),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              onPressed: login,
-                              child: Row(
-                                children: [
-                                  Image.asset("assets/images/google.png", width: 37, height: 37,
-                                  ),
-                              SizedBox(width: 5),
-                              SubtitleTextWidget(label: "Masuk dengan Google",
-                               color: Colors.white,
-                                ),
-                                ],
-                              ),
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    double width = MediaQuery.of(context).size.width;
+    double paddingSize = getResponsiveSize(context, 0.05);
 
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                          GestureDetector(
-                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen(),
-                            )),
-                            child: RichText(text: TextSpan(
-                                style: TextStyle(fontFamily: 'Inder', fontSize: 15, color: Colors.black),
-                                children: [
-                                  TextSpan(text: 'Belum Punya akun?'),
-                                  TextSpan(text: 'Daftar', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-                                  ),
-                                ]
-                            )
-                            )
-                          )
-                        ],
-                      ),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: SizedBox(
+          width: width,
+          height: MediaQuery.of(context).size.height,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Container(
+                  height: getResponsiveSize(context, 0.5),
+                  color: primaryColor,
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Welcome",
+                    style: TextStyle(
+                      fontSize: getResponsiveSize(context, 0.12),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'imprint',
                     ),
                   ),
-                ],
-              ),
+                ),
+                Container(
+                  color: primaryColor,
+                  child: Container(
+                    padding: EdgeInsets.all(paddingSize),
+                    margin: EdgeInsets.only(top: getResponsiveSize(context, 0.08)),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: getResponsiveSize(context, 0.05)),
+                        Text(
+                          "Masuk Sekarang",
+                          style: TextStyle(
+                            fontSize: getResponsiveSize(context, 0.06),
+                            fontFamily: 'Inder',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: getResponsiveSize(context, 0.05)),
+                        TextField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            label: SubtitleTextWidget(label: "Email"),
+                            prefixIcon: Icon(Icons.email),
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: getResponsiveSize(context, 0.04)),
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: hidePassword,
+                          focusNode: _focusNode,
+                          decoration: InputDecoration(
+                            label: const SubtitleTextWidget(label: "Password"),
+                            border: const OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.lock),
+                            suffixIcon: IconButton(
+                              icon: Icon(hidePassword ? Icons.visibility : Icons.visibility_off),
+                              onPressed: () {
+                                setState(() {
+                                  hidePassword = !hidePassword;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: getResponsiveSize(context, 0.06)),
+                        SizedBox(
+                          width: double.infinity,
+                          height: getResponsiveSize(context, 0.14),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: login,
+                            child: SubtitleTextWidget(
+                              label: "Masuk",
+                              color: Colors.white,
+                              fontSize: getResponsiveSize(context, 0.05),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: getResponsiveSize(context, 0.05)),
+                        SizedBox(
+                          width: double.infinity,
+                          height: getResponsiveSize(context, 0.14),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: login,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  "assets/images/google.png",
+                                  width: getResponsiveSize(context, 0.1),
+                                  height: getResponsiveSize(context, 0.1),
+                                ),
+                                SizedBox(width: getResponsiveSize(context, 0.02)),
+                                SubtitleTextWidget(
+                                  label: "Masuk dengan Google",
+                                  color: Colors.white,
+                                  fontSize: getResponsiveSize(context, 0.05),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: getResponsiveSize(context, 0.03)),
+                        GestureDetector(
+                          onTap: () => Navigator.push(
+                              context, MaterialPageRoute(builder: (context) => const SignUpScreen())),
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontFamily: 'Inder',
+                                fontSize: getResponsiveSize(context, 0.045),
+                                color: Colors.black,
+                              ),
+                              children: const [
+                                TextSpan(text: 'Belum Punya akun? '),
+                                TextSpan(
+                                  text: 'Daftar',
+                                  style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: getResponsiveSize(context, 0.04)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        ),
-        );
+      ),
+    );
   }
 }

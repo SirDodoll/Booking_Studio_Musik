@@ -7,6 +7,7 @@ import 'package:booking_application/auth/auth_services.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+
   final authService = AuthService();
 
   final _nameController = TextEditingController();
@@ -27,63 +29,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final FocusNode _passwordFocus = FocusNode();
   final FocusNode _confirmFocus = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool sembunyi = true;
+  bool loading = false;
   bool hidePassword = true;
   bool hideConfirm = true;
 
-  // Sign in Google
-  void initState() {
-    _setupAuthListener();
-    super.initState();
+  void signIn() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => loading = true);
+    setState(() => loading = false);
   }
-  void _setupAuthListener() {
-    supabase.auth.onAuthStateChange.listen((data) {
-      final event = data.event;
-      if (event == AuthChangeEvent.signedIn) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const RootScreen(),
-          ),
-        );
-      }
-    });
-  }
-  Future<AuthResponse> _googleSignIn() async {
-    /// TODO: update the Web client ID with your own.
-    ///
-    /// Web Client ID that you registered with Google Cloud.
-    const webClientId = '1093587091479-0jkhdhm4pthpfeagi4qddnoskv6hssd1.apps.googleusercontent.com';
-
-    /// TODO: update the iOS client ID with your own.
-    ///
-    /// iOS Client ID that you registered with Google Cloud.
-    const iosClientId = 'my-ios.apps.googleusercontent.com';
-
-    // Google sign in on Android will work without providing the Android
-    // Client ID registered on Google Cloud.
-
-    final GoogleSignIn googleSignIn = GoogleSignIn(
-      // clientId: iosClientId,
-      serverClientId: webClientId,
-    );
-    final googleUser = await googleSignIn.signIn();
-    final googleAuth = await googleUser!.authentication;
-    final accessToken = googleAuth.accessToken;
-    final idToken = googleAuth.idToken;
-
-    if (accessToken == null) {
-      throw 'No Access Token found.';
-    }
-    if (idToken == null) {
-      throw 'No ID Token found.';
-    }
-
-    return supabase.auth.signInWithIdToken(
-      provider: OAuthProvider.google,
-      idToken: idToken,
-      accessToken: accessToken,
-    );
-  }
-
   void SignUp() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
@@ -91,11 +46,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPassword.text.trim();
 
+    void signUpWithGoogle() async {
+      setState(() => loading = true);
+      setState(() => loading = false);
+    }
     if (password !=confirmPassword){
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Password Tidak Sesuai")));
       return;
     }
 
+    @override
+    void dispose() {
+      _nameController.dispose();
+      _emailController.dispose();
+      _passwordController.dispose();
+      super.dispose();
+    }
     try{
       await authService.signUpWithEmailPassword(name, email, password, telepon);
 
@@ -107,10 +73,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     }
   }
+  @override
 
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     return Scaffold(
         body: SizedBox(
           width: MediaQuery.of(context).size.width,
@@ -122,7 +91,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 children: [
                   Container(
                     height: 210,
-                    color: const Color(0xFF6539A2),
+                    color: primaryColor,
                     alignment: Alignment.center,
                     child: const Text(
                       "Welcome",
@@ -135,7 +104,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   Container(
-                    color: const Color(0xFF6539A2),
+                    color: primaryColor,
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       margin: const EdgeInsets.only(top: 40),
@@ -174,15 +143,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          TextField(
-                            keyboardType: TextInputType.phone,
+                          TextFormField(
                             controller: _teleponeController,
+                            keyboardType: TextInputType.phone,
+                            maxLength: 13,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(13),
+                            ],
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Nomor telepon wajib diisi';
+                              } else if (value.length < 10) {
+                                return 'Nomor telepon terlalu pendek';
+                              } else if (value.length > 13) {
+                                return 'Nomor telepon tidak boleh lebih dari 13 digit';
+                              }
+                              return null;
+                            },
                             decoration: const InputDecoration(
                               label: SubtitleTextWidget(label: "No Telepon"),
                               prefixIcon: Icon(Icons.phone),
                               border: OutlineInputBorder(),
+                              counterText: "",
                             ),
                           ),
+
                           const SizedBox(height: 20),
                           TextField(
                             controller: _passwordController,
@@ -229,7 +215,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             height: 50,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6539A2),
+                                backgroundColor: primaryColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -253,7 +239,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: _googleSignIn,
+                              onPressed: SignUp,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [

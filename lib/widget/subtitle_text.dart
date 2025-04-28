@@ -26,7 +26,7 @@ class SubtitleTextWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      textAlign: textAlign, // Diterapkan di sini
+      textAlign: textAlign,
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: fontWeight,

@@ -20,11 +20,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final session = Supabase.instance.client.auth.currentSession;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ID MUSIC',
       theme: Styles.themeData(context),
-      home: RootScreen(),
+      home: session != null ? const RootScreen() : const SignInScreen(),
     );
   }
 }

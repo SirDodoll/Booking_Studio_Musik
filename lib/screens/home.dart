@@ -5,7 +5,6 @@ import 'package:booking_application/widget/appbarName_widget.dart';
 import 'package:booking_application/widget/subtitle_text.dart';
 import 'package:flutter/material.dart';
 import 'package:booking_application/widget/alatMusic_widget.dart' show MusicInstruments;
-import 'package:booking_application/widget/infoJadwal.dart';
 import 'package:booking_application/widget/jam_oprasional.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:booking_application/widget/IconButton.dart';
@@ -24,11 +23,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   String? urlLokasi;
   String? urlIg;
   TimeOfDay? jamBuka;
   TimeOfDay? jamTutup;
+
   bool isStudioOpen() {
     final now = TimeOfDay.now();
     if (jamBuka == null || jamTutup == null) return false;
@@ -36,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     loadSettings();
   }
@@ -48,13 +47,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final tutup = await getJam("jamTutup");
 
     if (!mounted) return;
-      setState(() {
-        urlIg = ig;
-        urlLokasi = lokasi;
-        jamBuka = buka;
-        jamTutup = tutup;
-      });
-    }
+    setState(() {
+      urlIg = ig;
+      urlLokasi = lokasi;
+      jamBuka = buka;
+      jamTutup = tutup;
+    });
+  }
 
   Future<TimeOfDay?> getJam(String key) async {
     final value = await getSettingValue(key);
@@ -66,13 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> launchLokasi() async {
     final lokasiUrl = await getSettingValue('lokasi');
-
-    if (lokasiUrl == null) {
-      throw Exception("Lokasi tidak ditemukan");
-    }
+    if (lokasiUrl == null) throw Exception("Lokasi tidak ditemukan");
 
     final Uri url = Uri.parse(lokasiUrl);
-
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception("Gagal Membuka lokasi");
     }
@@ -80,18 +75,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> launchInstagram() async {
     final igUrl = await getSettingValue('instagram');
-
-    if (igUrl == null) {
-      throw Exception("Instagram tidak ditemukan");
-    }
+    if (igUrl == null) throw Exception("Instagram tidak ditemukan");
 
     final Uri url = Uri.parse(igUrl);
-
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception("Gagal Membuka Instagram");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -111,38 +101,34 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Image.asset(
                 'assets/images/logo2.png',
-                height: getResponsiveSize(context, 0.10),
-                width: getResponsiveSize(context, 0.09),
+                height: getResponsiveSize(context, 0.07),
               ),
-              SizedBox(width: getResponsiveSize(context, 0.03),),
+              SizedBox(width: 10),
               AppbarnameWidget(),
             ],
           ),
           actions: [
             Padding(
-              padding: EdgeInsets.only(right: getResponsiveSize(context, 0.04)),
+              padding: const EdgeInsets.only(right: 14.0),
               child: GestureDetector(
                 onTap: () {
-                 launchLokasi();
+                  launchLokasi();
                 },
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: getResponsiveSize(context, 0.040),
-                      vertical: getResponsiveSize(context, 0.017)
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: secondaryColor.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(getResponsiveSize(context, 0.05)),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.location_on, color: Colors.white, size: getResponsiveSize(context, 0.068)),
-                      SizedBox(width: getResponsiveSize(context, 0.011)),
-                      SubtitleTextWidget(
+                      const Icon(Icons.location_on, color: Colors.white, size: 20),
+                      const SizedBox(width: 5),
+                      const SubtitleTextWidget(
                         label: "Lokasi",
                         color: Colors.white,
-                        fontSize: getResponsiveFontSize(context, 0.047),
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
                     ],
@@ -154,20 +140,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       body: SafeArea(
-        child : SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 7),
+              const SizedBox(height: 7),
               JamOperasionalWidget(
                 buka: jamBuka ?? TimeOfDay(hour: 0, minute: 0),
                 tutup: jamTutup ?? TimeOfDay(hour: 0, minute: 0),
-                isOpen: isStudioOpen(),
+                isOpen: isOpen,
               ),
-              SizedBox(height: 7),
-              // Swiper Card
+              const SizedBox(height: 7),
+
               LayoutBuilder(
                 builder: (context, constraints) {
                   return SizedBox(
@@ -181,19 +164,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           return GestureDetector(
                             onTap: () {
                               if (index == 0) {
-                                Navigator.pushReplacement(
+                                Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => BookingScreen()),
+                                  MaterialPageRoute(builder: (context) => const BookingScreen()),
                                 );
-                              } else if (index == 1) {
-                                if (urlLokasi != null) {
-                                  final uri = Uri.parse(urlLokasi!);
-                                  launchUrl(uri, mode: LaunchMode.externalApplication);
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Lokasi belum tersedia')),
-                                  );
-                                }
+                              } else if (index == 1 && urlLokasi != null) {
+                                final uri = Uri.parse(urlLokasi!);
+                                launchUrl(uri, mode: LaunchMode.externalApplication);
                               }
                             },
                             child: Image.asset(
@@ -217,8 +194,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                child: Wrap(
+                  spacing: 70,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
                   children: [
                     IconbuttonWidget(
                       icon: FontAwesomeIcons.whatsapp,
@@ -227,9 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatScreen(),
-                          ),
+                          MaterialPageRoute(builder: (context) => const ChatScreen()),
                         );
                       },
                     ),
@@ -237,9 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       icon: FontAwesomeIcons.instagram,
                       label: "Instagram",
                       color: Colors.purple,
-                      onPressed: () {
-                        launchInstagram();
-                      },
+                      onPressed: launchInstagram,
                     ),
                     IconbuttonWidget(
                       icon: FontAwesomeIcons.questionCircle,
@@ -248,40 +223,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => FAQScreen(),
-                          ),
+                          MaterialPageRoute(builder: (context) => const FAQScreen()),
                         );
                       },
                     ),
                   ],
                 ),
               ),
-
-              SizedBox(height: 7),
-              // Widget Music
+              const SizedBox(height: 7),
               MusicInstruments(),
-              SizedBox(height: 7),
-              // Widget Info Jadwal Booking
-              InfoJadwalWidget(
-                bookings: [
-                  {
-                    'imageUrl': 'assets/images/profile.jpeg',
-                    'name': 'nama',
-                    'time': '09:00 - 12:00',
-                  },
-                  {
-                    'imageUrl': 'assets/images/profile.jpeg',
-                    'name': 'Orang',
-                    'time': '13:00 - 15:00',
-                  },
-                ],
-              ),
             ],
           ),
-        ),
         ),
       ),
     );
   }
-  }
+}

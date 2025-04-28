@@ -23,7 +23,7 @@ class _RootScreenState extends State<RootScreen> {
   List<Widget> screens = [
     HomeScreen(),
     BookingScreen(),
-    RiwayatScreen(),
+    RiwayatBookingScreen(),
     ProfileScreen(),
   ];
 

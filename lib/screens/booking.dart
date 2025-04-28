@@ -1,8 +1,11 @@
+import 'package:booking_application/auth/settings_services.dart';
 import 'package:booking_application/root_screens.dart';
 import 'package:booking_application/widget/subtitle_text.dart';
 import 'package:flutter/material.dart';
 import 'package:booking_application/auth/booking_services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});
@@ -13,20 +16,21 @@ class BookingScreen extends StatefulWidget {
 
 class _BookingScreenState extends State<BookingScreen> {
   final supabase = Supabase.instance.client;
-  final TextEditingController bandController = TextEditingController();
   final TextEditingController whatsappController = TextEditingController();
   int harga = 0;
-  int perJam = 0;
   int get totalHarga => harga * selectedTimes.length;
+  String? urlWA;
 
   String? pilihTanggal;
   List<String> selectedTimes = [];
   String? pilihPembayaran;
 
   List<String> pilihWaktu = [];
-  List<String> pembayaran = ['E-Wallet', 'Bayar ditempat'];
+  List<String> pembayaran = ['E-Wallet', ' Cash'];
 
   List<String> pilihanWaktu = [];
+  Set<String> waktuYangSudahDibooking = {};
+
 
   String formatTime(DateTime time) {
     return time.hour.toString().padLeft(2, '0') + ":" +
@@ -35,7 +39,6 @@ class _BookingScreenState extends State<BookingScreen> {
 
   void generateAvailableTimes(DateTime start, DateTime end) {
     List<String> times = [];
-
     DateTime current = start;
     while (current.isBefore(end)) {
       final next = current.add(Duration(hours: 1));
@@ -49,16 +52,59 @@ class _BookingScreenState extends State<BookingScreen> {
     });
   }
 
-
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+    pilihTanggal = DateFormat('yyyy-MM-dd').format(now);
     fetchBookingHarga();
     fetchJamBukaTutup();
+    nomorUser();
+    getUrl();
+
+    fetchWaktuSudahDibooking(pilihTanggal!);
+  }
+  Future<void> fetchWaktuSudahDibooking(String tanggal) async {
+    final response = await supabase
+        .from('bookings')
+        .select('waktu')
+        .eq('tanggal_booking', tanggal)
+        .inFilter('status', ['pending', 'confirmed']);
+
+    final List<dynamic> hasil = response;
+    final Set<String> waktuTerpakai = {};
+    for (var item in hasil) {
+      final waktu = item['waktu'] as String;
+      waktuTerpakai.addAll(waktu.split(',').map((w) => w.trim()));
+    }
+
+    if (!mounted) return;
+    setState(() {
+      waktuYangSudahDibooking = waktuTerpakai;
+    });
   }
 
+
+  Future<void> nomorUser() async {
+    final user = supabase.auth.currentUser;
+
+    if (user != null) {
+      try {
+        final response = await supabase
+            .from('users')
+            .select('telepon')
+            .eq('id', user.id)
+            .single();
+        if (!mounted) return;
+        whatsappController.text = response['telepon'];
+      } catch (e) {
+        print("Error saat mengambil nomor telepon: $e");
+      }
+    }
+  }
   Future<void> fetchBookingHarga() async {
     final data = await getBookingsData();
+    if (!mounted) return;
     setState(() {
       harga = data['harga'];
     });
@@ -76,6 +122,7 @@ class _BookingScreenState extends State<BookingScreen> {
     final jamBuka = DateTime.parse('$dateString ${response['jamBuka']}');
     final jamTutup = DateTime.parse('$dateString ${response['jamTutup']}');
 
+    if (!mounted) return;
     generateAvailableTimes(jamBuka, jamTutup);
   }
 
@@ -86,30 +133,127 @@ class _BookingScreenState extends State<BookingScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
+
     if (picked != null) {
+      final tanggal = DateFormat('yyyy-MM-dd').format(picked);
       setState(() {
-        pilihTanggal = "${picked.day}-${picked.month}-${picked.year}";
+        pilihTanggal = tanggal;
       });
+      await fetchWaktuSudahDibooking(tanggal);
     }
+  }
+
+
+  Future<void> submitBooking() async {
+    final user = supabase.auth.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Kamu belum login.")),
+      );
+      return;
+    }
+    if (pilihTanggal == null ||
+        selectedTimes.isEmpty ||
+        pilihPembayaran == null ||
+        whatsappController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Harap lengkapi semua data booking.")),
+      );
+      return;
+    }
+
+    try {
+      await supabase.from('bookings').insert({
+        'user_id': user.id,
+        'tanggal_booking': pilihTanggal,
+        'waktu': selectedTimes.join(', '),
+        'total_harga': totalHarga,
+        'no_wa': whatsappController.text,
+        'metode': pilihPembayaran,
+        'status': 'pending',
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: SubtitleTextWidget(label: "Booking Berhasil!")),
+      );
+
+      setState(() {
+        pilihTanggal = null;
+        selectedTimes.clear();
+        whatsappController.clear();
+        pilihPembayaran = null;
+      });
+
+    } catch (e) {
+      print("Error saat simpan booking: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal menyimpan booking.")),
+      );
+    }
+  }
+
+  Future<void> showConfirmationDialog() async {
+    if (pilihTanggal == null || selectedTimes.isEmpty || pilihPembayaran == null || whatsappController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Harap lengkapi semua data booking.")),
+      );
+      return;
+    }
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: SubtitleTextWidget(label: "Konfirmasi Booking"),
+        content: SubtitleTextWidget(label: "Setelah melakukan booking, anda tidak dapat membatalkannya. Jika ingin membatalkan, hubungi admin. Lanjutkan booking?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: SubtitleTextWidget(label: "Batal"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: SubtitleTextWidget(label: "Oke"),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await submitBooking();
+      await _launchWhatsApp();
+    }
+  }
+
+  Future<void> _launchWhatsApp() async {
+    if (urlWA == null) {
+      throw Exception("WhatsApp URL tidak ditemukan");
+    }
+
+    final Uri url = Uri.parse(urlWA!);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception("Gagal membuka WhatsApp");
+    }
+  }
+
+
+  Future<void> getUrl() async {
+    final wa = await getSettingValue('whatsApp');
+    if (!mounted) return;
+    setState(() {
+      urlWA = wa;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-
-
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50),
         child: AppBar(
           backgroundColor: primaryColor,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> RootScreen()), (route)=> false);
-            },
-          ),
           title: SubtitleTextWidget(label: "Booking", color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
@@ -145,8 +289,14 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
                 const SizedBox(height: 16),
                 const SubtitleTextWidget(label: "Pilih Waktu:"),
-                SizedBox(height: 10),
-                GridView.count(
+                pilihTanggal == null
+                    ? Center(
+                  child: SubtitleTextWidget(
+                    label: pilihTanggal ?? "",
+                    color: pilihTanggal == null ? Colors.grey : Colors.black,
+                  ),
+                )
+                    : GridView.count(
                   crossAxisCount: 3,
                   childAspectRatio: 2,
                   shrinkWrap: true,
@@ -155,12 +305,31 @@ class _BookingScreenState extends State<BookingScreen> {
                   crossAxisSpacing: 1,
                   children: pilihWaktu.map((time) {
                     final isSelected = selectedTimes.contains(time);
+                    final isBooked = waktuYangSudahDibooking.contains(time);
+                    final parts = time.split(" - ");
+                    final timeStart = parts[0];
+                    final timeStartParts = timeStart.split(":");
+                    final hour = int.parse(timeStartParts[0]);
+                    final minute = int.parse(timeStartParts[1]);
+
+                    final selectedDate = DateFormat('yyyy-MM-dd').parse(pilihTanggal!);
+                    final timeDateTime = DateTime(
+                      selectedDate.year,
+                      selectedDate.month,
+                      selectedDate.day,
+                      hour,
+                      minute,
+                    );
+                    final isPast = timeDateTime.isBefore(DateTime.now());
+                    final isDisabled = isBooked || isPast;
                     return Padding(
                       padding: const EdgeInsets.all(2.0),
                       child: ChoiceChip(
                         label: Text(time),
                         selected: isSelected,
-                        onSelected: (_) {
+                        onSelected: isDisabled
+                            ? null
+                            : (_) {
                           setState(() {
                             if (isSelected) {
                               selectedTimes.remove(time);
@@ -174,9 +343,9 @@ class _BookingScreenState extends State<BookingScreen> {
                         padding: EdgeInsets.symmetric(horizontal: 0.4, vertical: 0.4),
                         labelStyle: TextStyle(
                           fontSize: 12.5,
-                          color: isSelected
-                              ? Colors.white
-                              : ( Colors.black),
+                          color: isDisabled
+                              ? Colors.grey
+                              : (isSelected ? Colors.white : Colors.black),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -184,7 +353,7 @@ class _BookingScreenState extends State<BookingScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: 16),
-                SubtitleTextWidget(label: 'Masukan Nomor:'),
+                SubtitleTextWidget(label: 'Masukan Nomor WhatsApp:'),
                 SizedBox(height: 5),
                 TextField(
                   controller: whatsappController,
@@ -212,7 +381,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     );
                   }).toList(),
                   onChanged: (value) => setState(() => pilihPembayaran = value),
-                  dropdownColor: Colors.grey[800],
+                  dropdownColor: Colors.white,
                 ),
               ],
             ),
@@ -233,7 +402,7 @@ class _BookingScreenState extends State<BookingScreen> {
               width: 110,
               height: 43,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: showConfirmationDialog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   foregroundColor: Colors.white,
@@ -241,7 +410,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text("Bayar"),
+                child: SubtitleTextWidget(label: "Bayar"),
               ),
             ),
           ],

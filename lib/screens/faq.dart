@@ -39,6 +39,10 @@ class FAQScreen extends StatelessWidget {
         'tanya': 'Apa saja alat musik yang tersedia?',
         'jawab': 'ID MUSIC menyediakan drum, gitar, bass, keyboard, mikrofon.',
       },
+      {
+        'tanya': 'Bagaimana jika ada alat musik yang rusak?',
+        'jawab': '.',
+      },
     ];
 
     return Scaffold(

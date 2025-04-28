@@ -1,5 +1,5 @@
-import 'package:booking_application/widget/subtitle_text.dart';
 import 'package:flutter/material.dart';
+import 'package:booking_application/widget/subtitle_text.dart';
 
 class MusicInstruments extends StatelessWidget {
   final List<Map<String, String>> instruments = [
@@ -11,34 +11,45 @@ class MusicInstruments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-          child: SubtitleTextWidget(
-            label: "Alat-alat Musik",
-            fontSize: 18, fontWeight: FontWeight.bold
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = constraints.maxWidth * 0.6;
+        final imageHeight = cardWidth * 0.9;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+              child: SubtitleTextWidget(
+                label: "Alat-alat Musik",
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-        ),
-        SizedBox(
-          height: 180,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: instruments.map((instrument) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.6),
-                  child: InstrumentCard(
-                    name: instrument["name"]!,
-                    image: instrument["image"]!,
-                  ),
-                );
-              }).toList(),
+            SizedBox(
+              height: imageHeight + 50,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                itemCount: instruments.length,
+                itemBuilder: (context, index) {
+                  final instrument = instruments[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: InstrumentCard(
+                      name: instrument["name"]!,
+                      image: instrument["image"]!,
+                      width: cardWidth,
+                      imageHeight: imageHeight,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
@@ -46,20 +57,27 @@ class MusicInstruments extends StatelessWidget {
 class InstrumentCard extends StatelessWidget {
   final String name;
   final String image;
+  final double width;
+  final double imageHeight;
 
-  InstrumentCard({required this.name, required this.image});
+  const InstrumentCard({
+    required this.name,
+    required this.image,
+    required this.width,
+    required this.imageHeight,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 180,
+    return SizedBox(
+      width: width,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
-              height: 145,
+              height: imageHeight,
               width: double.infinity,
               child: GestureDetector(
                 onTap: () {
@@ -84,23 +102,22 @@ class InstrumentCard extends StatelessWidget {
                   );
                 },
                 child: ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   child: Image.asset(
                     image,
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-
             ),
             Padding(
-              padding: const EdgeInsets.all(1.5),
+              padding: const EdgeInsets.all(6),
               child: SubtitleTextWidget(
                 label: name,
                 fontWeight: FontWeight.bold,
-                fontSize: 17,
+                fontSize: 16,
               ),
-              ),
+            ),
           ],
         ),
       ),
