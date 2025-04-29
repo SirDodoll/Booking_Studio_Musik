@@ -25,7 +25,6 @@ class FAQScreen extends StatelessWidget {
         'jawab': [
           'Masuk ke halaman Booking',
           'Pilih tanggal dan waktu',
-          'Pilih perlengkapan tambahan (opsional)',
           'Masukan nomor WhatsApp',
           'Klik tombol "Bayar", kemudian akan diarahkan ke aplikasi WhatsApp',
         ],
@@ -40,8 +39,8 @@ class FAQScreen extends StatelessWidget {
         'jawab': 'ID MUSIC menyediakan drum, gitar, bass, keyboard, mikrofon.',
       },
       {
-        'tanya': 'Bagaimana jika ada alat musik yang rusak?',
-        'jawab': '.',
+        'tanya': 'Bagaimana jika ada alat musik yang rusak akibat kelalaian pengguna?',
+        'jawab': 'Pengguna akan diberikan sanksi berupa denda sesuai dengan tingkat kerusakan ',
       },
     ];
 

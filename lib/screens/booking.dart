@@ -194,6 +194,7 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Future<void> showConfirmationDialog() async {
+    final primaryColor = Theme.of(context).colorScheme.primary;
     if (pilihTanggal == null || selectedTimes.isEmpty || pilihPembayaran == null || whatsappController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Harap lengkapi semua data booking.")),
@@ -204,16 +205,19 @@ class _BookingScreenState extends State<BookingScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: SubtitleTextWidget(label: "Konfirmasi Booking"),
         content: SubtitleTextWidget(label: "Setelah melakukan booking, anda tidak dapat membatalkannya. Jika ingin membatalkan, hubungi admin. Lanjutkan booking?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: SubtitleTextWidget(label: "Batal"),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: SubtitleTextWidget(label: "Oke"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+            ),
           ),
         ],
       ),

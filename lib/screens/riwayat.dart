@@ -30,6 +30,8 @@ class _RiwayatBookingScreenState extends State<RiwayatBookingScreen> {
   }
 
   void updateCurrentPage() {
+    if (!mounted) return;
+
     final start = page * limit;
     final end = start + limit;
     setState(() {
@@ -42,11 +44,14 @@ class _RiwayatBookingScreenState extends State<RiwayatBookingScreen> {
 
   Future<void> fetchRiwayat() async {
     final user = supabase.auth.currentUser;
+    if (!mounted) return;
     if (user == null) return;
 
-    setState(() {
-      isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
 
     try {
       var query = supabase
@@ -62,24 +67,37 @@ class _RiwayatBookingScreenState extends State<RiwayatBookingScreen> {
 
       final response = await query.order('tanggal_booking', ascending: false);
 
+      if (!mounted) return;
+
       if (response != null) {
         final data = List<Map<String, dynamic>>.from(response as List);
-        setState(() {
-          allRiwayat = data;
-        });
+        if (mounted) {
+          setState(() {
+            allRiwayat = data;
+          });
+        }
       } else {
-        setState(() {
-          allRiwayat = [];
-        });
+        if (mounted) {
+          setState(() {
+            allRiwayat = [];
+          });
+        }
       }
-      page = 0;
-      updateCurrentPage();
+
+      if (mounted) {
+        setState(() {
+          page = 0;
+        });
+        updateCurrentPage();
+      }
     } catch (error) {
       print('Error fetching booking history: $error');
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -107,7 +125,7 @@ class _RiwayatBookingScreenState extends State<RiwayatBookingScreen> {
             );
           }).toList(),
           onChanged: (value) {
-            if (value != null) {
+            if (value != null && mounted) {
               setState(() {
                 selectedStatus = value;
               });
@@ -243,7 +261,7 @@ class _RiwayatBookingScreenState extends State<RiwayatBookingScreen> {
                             initialDateRange: DateTimeRange(start: startDate, end: endDate),
                           );
 
-                          if (picked != null) {
+                          if (picked != null && mounted) {
                             setState(() {
                               startDate = picked.start;
                               endDate = picked.end;
@@ -283,8 +301,10 @@ class _RiwayatBookingScreenState extends State<RiwayatBookingScreen> {
                       ElevatedButton(
                         onPressed: page > 0
                             ? () {
-                          setState(() => page--);
-                          updateCurrentPage();
+                          if (mounted) {
+                            setState(() => page--);
+                            updateCurrentPage();
+                          }
                         }
                             : null,
                         child: SubtitleTextWidget(label: 'Sebelumnya'),
@@ -293,8 +313,10 @@ class _RiwayatBookingScreenState extends State<RiwayatBookingScreen> {
                       ElevatedButton(
                         onPressed: ((page + 1) * limit < allRiwayat.length)
                             ? () {
-                          setState(() => page++);
-                          updateCurrentPage();
+                          if (mounted) {
+                            setState(() => page++);
+                            updateCurrentPage();
+                          }
                         }
                             : null,
                         style: ElevatedButton.styleFrom(

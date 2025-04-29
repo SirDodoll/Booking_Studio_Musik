@@ -17,7 +17,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _imageFile;
   String? _uploadedImageUrl;
   bool isPicking = false;
-
   final authService = AuthService();
   final SupabaseClient supabase = Supabase.instance.client;
   String? _email;
@@ -60,45 +59,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future uploadImage() async {
-    if (_imageFile == null) return;
-    final fileName = DateTime.now().microsecondsSinceEpoch.toString();
-    final path = 'upload/$fileName.jpg';
-
-    try {
-      await Supabase.instance.client.storage
-          .from('images')
-          .upload(path, _imageFile!, fileOptions: const FileOptions(cacheControl: '3600', upsert: false));
-
-      final url = Supabase.instance.client.storage.from('images').getPublicUrl(path);
-
-      setState(() {
-        _uploadedImageUrl = url;
-      });
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Upload Berhasil")),
-        );
-      }
-    } catch (e) {
-      print("Upload error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Upload Gagal")),
-      );
-    }
-  }
+  // Future uploadImage() async {
+  //   if (_imageFile == null) return;
+  //   final fileName = DateTime.now().microsecondsSinceEpoch.toString();
+  //   final path = 'upload/$fileName.jpg';
+  //
+  //   try {
+  //     await Supabase.instance.client.storage
+  //         .from('images')
+  //         .upload(path, _imageFile!, fileOptions: const FileOptions(cacheControl: '3600', upsert: false));
+  //
+  //     final url = Supabase.instance.client.storage.from('images').getPublicUrl(path);
+  //
+  //     setState(() {
+  //       _uploadedImageUrl = url;
+  //     });
+  //
+  //     if (context.mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text("Upload Berhasil")),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print("Upload error: $e");
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text("Upload Gagal")),
+  //     );
+  //   }
+  // }
 
   void logout() async {
+    final primaryColor = Theme.of(context).colorScheme.primary;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const SubtitleTextWidget(label: 'Konfirmasi'),
           content: const SubtitleTextWidget(label: 'Apakah anda yakin ingin logout?'),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Tidak')),
-            TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Ya')),
+            ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Ya'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+              ),
+
+            ),
           ],
         );
       },
